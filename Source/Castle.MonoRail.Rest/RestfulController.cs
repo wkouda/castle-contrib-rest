@@ -28,19 +28,36 @@ namespace Castle.MonoRail.Rest
 	public class RestfulController : SmartDispatcherController 
 	{
 		private string _controllerAction;
+		private const string OptionsString = "Options";
+		IDictionary allowedActions;
+		IRequest currentRequest;
 
 	    protected override MethodInfo SelectMethod(string action, IDictionary actions, IRequest request,
 	                                               IDictionary<string, object> actionArgs, ActionType actionType)
 	    {
 	    	string restAction = ActionSelector.GetRestActionName(action, actions, HttpMethod);
+			allowedActions = actions;
+	    	currentRequest = request;
+	    	
+			// For Options Http methods, ignore the current   
+			// action and invoke the Options() action instead
+			if (HttpMethod.ToUpper() == "OPTIONS")
+			{
+				var optionsMethodInfo = GetType().GetMethod(OptionsString, BindingFlags.NonPublic | BindingFlags.Instance);
+				if (!actions.Contains(OptionsString))
+				{
+					allowedActions.Add(OptionsString, optionsMethodInfo);
+				}
+				return optionsMethodInfo;
+			}
 
-			if (ActionSelector.IsCollectionAction(action))
+	    	if (ActionSelector.IsCollectionAction(action))
 			{
 				switch (HttpMethod.ToUpper())
 				{
 					case "GET":
 					case "POST":
-						_controllerAction = restAction;
+					_controllerAction = restAction;
 						return (MethodInfo)actions[restAction];
 					default:
 						return base.SelectMethod(action, actions, request, actionArgs, actionType);
@@ -67,8 +84,25 @@ namespace Castle.MonoRail.Rest
 						return base.SelectMethod(action, actions, request, actionArgs, actionType);
 				}
 			}
-			
 			return base.SelectMethod(action, actions, request, actionArgs, actionType);
+		}
+
+		// The response when an Options method is detected
+		protected void Options()
+		{
+			CancelView();
+			
+			var allowedMethods = MethodSelector.GetAllowedMethods(allowedActions);
+			if (!string.IsNullOrEmpty(allowedMethods))
+			{
+				Response.AppendHeader("Access-Control-Allow-Methods", allowedMethods);
+			}
+
+			var allowOrigin = WebConfigFile.GetAllowOriginConfigSetting(currentRequest);
+			if(!string.IsNullOrEmpty(allowOrigin))
+			{
+				Response.AppendHeader("Access-Control-Allow-Origin", allowOrigin);
+			}
 		}
 
 		protected void RespondTo(Action<ResponseFormat> collectFormats)

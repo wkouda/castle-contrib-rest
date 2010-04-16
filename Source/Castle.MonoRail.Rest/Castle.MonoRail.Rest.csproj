@@ -46,6 +46,7 @@
       <HintPath>..\..\lib\Castle.MonoRail.Framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -60,14 +61,17 @@
     <Compile Include="ActionSelector.cs" />
     <Compile Include="Binding\XmlBindAttribute.cs" />
     <Compile Include="Binding\XmlTreeBuilder.cs" />
+    <Compile Include="WebConfigFile.cs" />
     <Compile Include="ControllerBridge.cs" />
     <Compile Include="DefaultRestVerbResolver.cs" />
     <Compile Include="DefaultUrlProvider.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="IControllerBridge.cs" />
     <Compile Include="IRestVerbResolver.cs" />
+    <Compile Include="MethodSelector.cs" />
     <Compile Include="Mime\AcceptType.cs" />
     <Compile Include="Mime\MimeType.cs" />
+    <Compile Include="MonoRailRestConfigSection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Responder.cs" />
     <Compile Include="ResponseFormat.cs" />
