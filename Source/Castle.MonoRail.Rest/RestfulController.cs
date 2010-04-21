@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Music Glue: this Castle.MonoRail.Rest code has been modified to handle  
+// preflighted requests in cross-domain contexts. A preflighted request 
+// first sends an HTTP OPTIONS request header to the resource on the other  
+// domain to check if the initial request is safe. 
+// Only then is the initial request handled.
+
 using System.Linq;
 
 namespace Castle.MonoRail.Rest
@@ -98,10 +104,18 @@ namespace Castle.MonoRail.Rest
 				Response.AppendHeader("Access-Control-Allow-Methods", allowedMethods);
 			}
 
-			var allowOrigin = WebConfigFile.GetAllowOriginConfigSetting(currentRequest);
-			if(!string.IsNullOrEmpty(allowOrigin))
+			var allowSettings = WebConfigFile.GetAllowConfigSettings(currentRequest);
+			if (!string.IsNullOrEmpty(allowSettings["Origin"]))
 			{
-				Response.AppendHeader("Access-Control-Allow-Origin", allowOrigin);
+				Response.AppendHeader("Access-Control-Allow-Origin", allowSettings["Origin"]);
+			}
+			if (!string.IsNullOrEmpty(allowSettings["Header"]))
+			{
+				Response.AppendHeader("Access-Control-Allow-Headers", allowSettings["Header"]);
+			}
+			if (!string.IsNullOrEmpty(allowSettings["Credentials"]))
+			{
+				Response.AppendHeader("Access-Control-Allow-Credentials", allowSettings["Credentials"]);
 			}
 		}
 
